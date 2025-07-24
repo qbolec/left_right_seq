@@ -4,11 +4,11 @@ C++ header-only lib for synchronizing single writer with many readers
 # What if Left-Right and Seq-Lock had a baby?
 There are two cool ways of synchronizing single writer with many readers.
 
-A Left-Right<T> maintains internally two copies of T, and lets the readers use the other when one is being modified.
+A [Left-Right<T>](https://concurrencyfreaks.blogspot.com/2013/12/left-right-classical-algorithm.html) maintains internally two copies of T, and lets the readers use the other when one is being modified.
 The readers are never blocked by the writer, but the writer might need to wait for a reader (say if it got preempted from CPU in the middle of read, leaving non-zero refcount).
 One downside of Left-Right is that you need space for 2 copies and time for 2 updates.
 
-A Seq-lock<T> maintains a counter, which the writer bumps before and after modification, so a reader can detect the write is happening by checking parity or that it happened during its read by comparing the counter before and after the read.
+A [Seq-lock<T>](https://en.wikipedia.org/wiki/Seqlock) maintains a counter, which the writer bumps before and after modification, so a reader can detect the write is happening by checking parity or that it happened during its read by comparing the counter before and after the read.
 The writer is never blocked, but the readers might have to wait for the writer (say, if it got preempted from CPU in the middle of write, leaving odd counter).
 Interestingly the readers do not announce their presense in any way, so they never write to memory, which is nice for performance.
 Also, the class itself only uses memory_order_release and memory_order_acquire atomic operations, which on x64 transalate to simple `mov`s - no extra memory barriers.
